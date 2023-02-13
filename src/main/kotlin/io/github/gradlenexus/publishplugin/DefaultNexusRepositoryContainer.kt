@@ -16,14 +16,17 @@
 
 package io.github.gradlenexus.publishplugin
 
+import groovy.lang.Closure
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
+import org.gradle.kotlin.dsl.closureOf
+import org.gradle.kotlin.dsl.invoke
 import java.net.URI
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
 internal open class DefaultNexusRepositoryContainer @Inject constructor(
-    delegate: NamedDomainObjectContainer<NexusRepository>
+    private val delegate: NamedDomainObjectContainer<NexusRepository>
 ) : NexusRepositoryContainer, NamedDomainObjectContainer<NexusRepository> by delegate {
 
     override fun sonatype(): NexusRepository = sonatype {}
@@ -33,4 +36,7 @@ internal open class DefaultNexusRepositoryContainer @Inject constructor(
         snapshotRepositoryUrl.set(URI.create("https://oss.sonatype.org/content/repositories/snapshots/"))
         action.execute(this)
     }
+
+    override fun configure(configureClosure: Closure<*>): NamedDomainObjectContainer<NexusRepository> =
+        delegate.configure(closureOf<NexusRepositoryContainer> { configureClosure(this) })
 }
