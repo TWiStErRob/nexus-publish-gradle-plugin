@@ -17,10 +17,12 @@
 package io.github.gradlenexus.publishplugin
 
 import org.gradle.api.Action
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.container
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.property
+import java.net.URI
 import java.time.Duration
 
 @Suppress("UnstableApiUsage")
@@ -50,12 +52,21 @@ open class NexusPublishExtension(project: Project) {
 
     fun transitionCheckOptions(action: Action<in TransitionCheckOptions>) = action.execute(transitionCheckOptions.get())
 
-    val repositories: NexusRepositoryContainer = project.objects.newInstance(
-        DefaultNexusRepositoryContainer::class,
+    val repositories: NamedDomainObjectContainer<NexusRepository> =
         project.container(NexusRepository::class) { name ->
             project.objects.newInstance(NexusRepository::class, name, project)
         }
-    )
 
-    fun repositories(action: Action<in NexusRepositoryContainer>) = action.execute(repositories)
+    fun repositories(action: Action<in NamedDomainObjectContainer<NexusRepository>>) = action.execute(repositories)
+
+    fun sonatype(): NexusRepository = repositories.sonatype()
+    fun sonatype(action: Action<in NexusRepository>): NexusRepository = repositories.sonatype(action)
+
+    fun NamedDomainObjectContainer<NexusRepository>.sonatype(): NexusRepository = sonatype {}
+    fun NamedDomainObjectContainer<NexusRepository>.sonatype(action: Action<in NexusRepository>): NexusRepository =
+        create("sonatype") {
+            nexusUrl.set(URI.create("https://oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(URI.create("https://oss.sonatype.org/content/repositories/snapshots/"))
+            action.execute(this)
+        }
 }
