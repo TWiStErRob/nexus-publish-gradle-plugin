@@ -19,7 +19,7 @@ package io.github.gradlenexus.publishplugin
 import groovy.lang.Closure
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
-import org.gradle.kotlin.dsl.closureOf
+import org.gradle.kotlin.dsl.delegateClosureOf
 import org.gradle.kotlin.dsl.invoke
 import java.net.URI
 import javax.inject.Inject
@@ -38,5 +38,5 @@ internal open class DefaultNexusRepositoryContainer @Inject constructor(
     }
 
     override fun configure(configureClosure: Closure<*>): NamedDomainObjectContainer<NexusRepository> =
-        delegate.configure(closureOf<NexusRepositoryContainer> { configureClosure(this) })
+        delegate.configure(delegateClosureOf<NexusRepositoryContainer> { configureClosure(this) })
 }
