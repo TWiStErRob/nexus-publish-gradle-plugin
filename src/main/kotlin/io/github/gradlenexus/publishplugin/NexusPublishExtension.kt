@@ -18,7 +18,6 @@ package io.github.gradlenexus.publishplugin
 
 import org.gradle.api.Action
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.container
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.property
 import java.time.Duration
