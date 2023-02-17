@@ -38,5 +38,5 @@ internal open class DefaultNexusRepositoryContainer @Inject constructor(
     }
 
     override fun configure(configureClosure: Closure<*>): NamedDomainObjectContainer<NexusRepository> =
-        apply { project.configure(this, configureClosure) }
+        apply { project.configure(this as Any, configureClosure) }
 }
