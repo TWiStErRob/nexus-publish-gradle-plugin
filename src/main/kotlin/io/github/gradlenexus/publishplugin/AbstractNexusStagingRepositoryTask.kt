@@ -26,7 +26,7 @@ import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
 abstract class AbstractNexusStagingRepositoryTask @Inject
-constructor(extension: NexusPublishExtension, repository: NexusRepository) : DefaultTask() {
+constructor(private val extension: NexusPublishExtension, repository: NexusRepository) : DefaultTask() {
 
     @get:Internal
     abstract val clientTimeout: Property<Duration>
