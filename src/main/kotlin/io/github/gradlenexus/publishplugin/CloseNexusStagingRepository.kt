@@ -29,7 +29,7 @@ abstract class CloseNexusStagingRepository @Inject constructor(
 ) : AbstractTransitionNexusStagingRepositoryTask(extension, repository, registry) {
 
     @Option(option = "staging-repository-id", description = "staging repository id to close")
-    fun setStagingRepositoryId(stagingRepositoryId: String) {
+    fun setStagingRepositoryIdToClose(stagingRepositoryId: String) {
         this.stagingRepositoryId.set(stagingRepositoryId)
     }
 

@@ -29,7 +29,7 @@ abstract class ReleaseNexusStagingRepository @Inject constructor(
 ) : AbstractTransitionNexusStagingRepositoryTask(extension, repository, registry) {
 
     @Option(option = "staging-repository-id", description = "staging repository id to release")
-    fun setStagingRepositoryId(stagingRepositoryId: String) {
+    fun setStagingRepositoryIdToRelease(stagingRepositoryId: String) {
         this.stagingRepositoryId.set(stagingRepositoryId)
     }
 
