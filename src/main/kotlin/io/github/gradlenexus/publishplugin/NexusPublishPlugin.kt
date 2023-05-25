@@ -82,56 +82,43 @@ class NexusPublishPlugin : Plugin<Project> {
     private fun configureNexusTasks(rootProject: Project, extension: NexusPublishExtension, registry: Provider<StagingRepositoryDescriptorRegistry>) {
         extension.repositories.all {
             val repository = this
-            val retrieveStagingProfileTask = rootProject.tasks.register<RetrieveStagingProfile>("retrieve${capitalizedName}StagingProfile", extension, repository)
-            val initializeTask = rootProject.tasks.register<InitializeNexusStagingRepository>(
-                "initialize${capitalizedName}StagingRepository",
-                extension,
-                repository,
-                registry
-            )
-            val findStagingRepository = rootProject.tasks.register<FindStagingRepository>(
-                "find${capitalizedName}StagingRepository",
-                extension,
-                repository,
-                registry
-            )
-            findStagingRepository {
-                description = "Finds the staging repository for ${repository.name}"
-            }
-            val closeTask = rootProject.tasks.register<CloseNexusStagingRepository>(
-                "close${capitalizedName}StagingRepository",
-                extension,
-                repository,
-                registry
-            )
-            val releaseTask = rootProject.tasks.register<ReleaseNexusStagingRepository>(
-                "release${capitalizedName}StagingRepository",
-                extension,
-                repository,
-                registry
-            )
-            val closeAndReleaseTask = rootProject.tasks.register<Task>(
-                "closeAndRelease${capitalizedName}StagingRepository"
-            )
-            retrieveStagingProfileTask {
-                description = "Gets and displays a staging profile id for a given repository and package group. This is a diagnostic task to get the value and put it into the NexusRepository configuration closure as stagingProfileId."
-            }
+            val retrieveStagingProfileTask = rootProject.tasks
+                .register<RetrieveStagingProfile>("retrieve${capitalizedName}StagingProfile") {
+                    description = "Gets and displays a staging profile id for a given repository and package group. " +
+                            "This is a diagnostic task to get the value and put it into the NexusRepository configuration closure as stagingProfileId."
+                }
+            val initializeTask = rootProject.tasks
+                .register<InitializeNexusStagingRepository>("initialize${capitalizedName}StagingRepository") {
+                }
+            val findStagingRepositoryTask = rootProject.tasks
+                .register<FindStagingRepository>("find${capitalizedName}StagingRepository") {
+                    description = "Finds the staging repository for ${repository.name}"
+                }
+            val closeTask = rootProject.tasks
+                .register<CloseNexusStagingRepository>("close${capitalizedName}StagingRepository") {
+                    description = "Closes open staging repository in '${repository.name}' Nexus instance."
+                    group = PublishingPlugin.PUBLISH_TASK_GROUP
+                }
+            val releaseTask = rootProject.tasks
+                .register<ReleaseNexusStagingRepository>("release${capitalizedName}StagingRepository") {
+                    description = "Releases closed staging repository in '${repository.name}' Nexus instance."
+                    group = PublishingPlugin.PUBLISH_TASK_GROUP
+                }
+            val closeAndReleaseTask = rootProject.tasks
+                .register<Task>("closeAndRelease${capitalizedName}StagingRepository") {
+                    description = "Closes and releases open staging repository in '${repository.name}' Nexus instance."
+                    group = PublishingPlugin.PUBLISH_TASK_GROUP
+                }
             closeTask {
-                description = "Closes open staging repository in '${repository.name}' Nexus instance."
-                group = PublishingPlugin.PUBLISH_TASK_GROUP
                 mustRunAfter(initializeTask)
-                mustRunAfter(findStagingRepository)
+                mustRunAfter(findStagingRepositoryTask)
             }
             releaseTask {
-                description = "Releases closed staging repository in '${repository.name}' Nexus instance."
-                group = PublishingPlugin.PUBLISH_TASK_GROUP
                 mustRunAfter(initializeTask)
-                mustRunAfter(findStagingRepository)
+                mustRunAfter(findStagingRepositoryTask)
                 mustRunAfter(closeTask)
             }
             closeAndReleaseTask {
-                description = "Closes and releases open staging repository in '${repository.name}' Nexus instance."
-                group = PublishingPlugin.PUBLISH_TASK_GROUP
                 dependsOn(closeTask, releaseTask)
             }
         }
