@@ -17,40 +17,35 @@
 package io.github.gradlenexus.publishplugin
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
-import org.gradle.kotlin.dsl.property
 import java.time.Duration
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
 abstract class AbstractNexusStagingRepositoryTask @Inject
-constructor(objects: ObjectFactory, extension: NexusPublishExtension, repository: NexusRepository) : DefaultTask() {
+constructor(extension: NexusPublishExtension, repository: NexusRepository) : DefaultTask() {
 
-    @Internal
-    val clientTimeout = objects.property<Duration>().apply {
-        set(extension.clientTimeout)
-    }
+    @get:Internal
+    abstract val clientTimeout: Property<Duration>
 
-    @Internal
-    val connectTimeout = objects.property<Duration>().apply {
-        set(extension.connectTimeout)
-    }
+    @get:Internal
+    abstract val connectTimeout: Property<Duration>
 
     // TODO: Expose externally as interface with getters only
-    @Nested
-    val repository = objects.property<NexusRepository>().apply {
-        set(repository)
-    }
+    @get:Nested
+    abstract val repository: Property<NexusRepository>
 
-    @Input
-    val repositoryDescription = objects.property<String>().apply {
-        set(extension.repositoryDescription)
-    }
+    @get:Input
+    abstract val repositoryDescription: Property<String>
 
     init {
+        this.clientTimeout.set(extension.clientTimeout)
+        this.connectTimeout.set(extension.connectTimeout)
+        this.repository.set(repository)
+        this.repositoryDescription.set(extension.repositoryDescription)
         this.onlyIf { extension.useStaging.getOrElse(false) }
     }
 }

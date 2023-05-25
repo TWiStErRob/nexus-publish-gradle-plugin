@@ -81,17 +81,15 @@ class NexusPublishPlugin : Plugin<Project> {
     private fun configureNexusTasks(rootProject: Project, extension: NexusPublishExtension, registry: Provider<StagingRepositoryDescriptorRegistry>) {
         extension.repositories.all {
             val repository = this
-            val retrieveStagingProfileTask = rootProject.tasks.register<RetrieveStagingProfile>("retrieve${capitalizedName}StagingProfile", rootProject.objects, extension, repository)
+            val retrieveStagingProfileTask = rootProject.tasks.register<RetrieveStagingProfile>("retrieve${capitalizedName}StagingProfile", extension, repository)
             val initializeTask = rootProject.tasks.register<InitializeNexusStagingRepository>(
                 "initialize${capitalizedName}StagingRepository",
-                rootProject.objects,
                 extension,
                 repository,
                 registry
             )
             val findStagingRepository = rootProject.tasks.register<FindStagingRepository>(
                 "find${capitalizedName}StagingRepository",
-                rootProject.objects,
                 extension,
                 repository,
                 registry
@@ -101,14 +99,12 @@ class NexusPublishPlugin : Plugin<Project> {
             }
             val closeTask = rootProject.tasks.register<CloseNexusStagingRepository>(
                 "close${capitalizedName}StagingRepository",
-                rootProject.objects,
                 extension,
                 repository,
                 registry
             )
             val releaseTask = rootProject.tasks.register<ReleaseNexusStagingRepository>(
                 "release${capitalizedName}StagingRepository",
-                rootProject.objects,
                 extension,
                 repository,
                 registry

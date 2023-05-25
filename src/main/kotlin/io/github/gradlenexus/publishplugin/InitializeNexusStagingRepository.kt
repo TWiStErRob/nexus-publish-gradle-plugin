@@ -20,26 +20,26 @@ import io.github.gradlenexus.publishplugin.internal.NexusClient
 import io.github.gradlenexus.publishplugin.internal.StagingRepositoryDescriptorRegistry
 import okhttp3.HttpUrl
 import org.gradle.api.GradleException
-import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.property
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
-open class InitializeNexusStagingRepository @Inject constructor(
-    objects: ObjectFactory,
+abstract class InitializeNexusStagingRepository @Inject constructor(
     extension: NexusPublishExtension,
     repository: NexusRepository,
     private val registry: Provider<StagingRepositoryDescriptorRegistry>
-) : AbstractNexusStagingRepositoryTask(objects, extension, repository) {
+) : AbstractNexusStagingRepositoryTask(extension, repository) {
 
-    @Optional
-    @Input
-    val packageGroup = objects.property<String>().apply {
-        set(extension.packageGroup)
+    @get:Optional
+    @get:Input
+    abstract val packageGroup: Property<String>
+
+    init {
+        this.packageGroup.set(extension.packageGroup)
     }
 
     @TaskAction
