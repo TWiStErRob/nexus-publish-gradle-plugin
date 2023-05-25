@@ -16,10 +16,7 @@
 
 package io.github.gradlenexus.publishplugin
 
-import org.gradle.api.Project
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
-import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
@@ -27,7 +24,7 @@ import java.net.URI
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
-abstract class NexusRepository @Inject constructor(@Input val name: String, project: Project) {
+abstract class NexusRepository @Inject constructor(@Input val name: String) {
 
     @get:Input
     abstract val nexusUrl: Property<URI>
@@ -50,15 +47,4 @@ abstract class NexusRepository @Inject constructor(@Input val name: String, proj
 
     @get:Internal
     internal val capitalizedName: String by lazy { name.capitalize() }
-
-    init {
-        username.set(project.providers.findProperty("${name}Username"))
-        password.set(project.providers.findProperty("${name}Password"))
-    }
 }
-
-/**
- * @see Project.findProperty as it was used to find this, but it's impractical do the same in the new lazy API.
- */
-private fun ProviderFactory.findProperty(propertyName: String): Provider<String> =
-    gradleProperty(propertyName).orElse(systemProperty(propertyName))

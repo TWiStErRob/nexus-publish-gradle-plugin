@@ -20,6 +20,8 @@ import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectFactory
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.container
 import org.gradle.kotlin.dsl.newInstance
 import java.time.Duration
@@ -54,7 +56,10 @@ abstract class NexusPublishExtension(project: Project) {
             project.container(
                 NexusRepository::class,
                 NamedDomainObjectFactory { name ->
-                    objects.newInstance<NexusRepository>(name, objects, providers)
+                    objects.newInstance<NexusRepository>(name).apply {
+                        username.set(providers.findProperty("${name}Username"))
+                        password.set(providers.findProperty("${name}Password"))
+                    }
                 }
             )
         )
@@ -62,3 +67,9 @@ abstract class NexusPublishExtension(project: Project) {
 
     fun repositories(action: Action<in NexusRepositoryContainer>) = action.execute(repositories)
 }
+
+/**
+ * @see Project.findProperty as it was used to find this, but it's impractical do the same in the new lazy API.
+ */
+private fun ProviderFactory.findProperty(propertyName: String): Provider<String> =
+    gradleProperty(propertyName).orElse(systemProperty(propertyName))
