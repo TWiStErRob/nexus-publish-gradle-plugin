@@ -17,6 +17,7 @@
 package io.github.gradlenexus.publishplugin
 
 import org.assertj.core.api.Assertions.assertThat
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.publish.PublishingExtension
@@ -67,7 +68,7 @@ class TaskOrchestrationTest {
         // given
         initSingleProjectWithDefaultConfiguration()
         project.extensions.configure<NexusPublishExtension> {
-            repositories.add(NexusRepository("myNexus", project))
+            repositories.create("myNexus")
         }
         // expect
         assertGivenTaskMustNotRunAfterAnother(transitioningTaskName, "publishToMyNexus")

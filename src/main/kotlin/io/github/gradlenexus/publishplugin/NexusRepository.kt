@@ -17,39 +17,40 @@
 package io.github.gradlenexus.publishplugin
 
 import org.gradle.api.Project
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
-import org.gradle.kotlin.dsl.property
 import java.net.URI
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
-open class NexusRepository @Inject constructor(@Input val name: String, project: Project) {
+abstract class NexusRepository @Inject constructor(@Input val name: String, project: Project) {
 
-    @Input
-    val nexusUrl = project.objects.property<URI>()
+    @get:Input
+    abstract val nexusUrl: Property<URI>
 
-    @Input
-    val snapshotRepositoryUrl = project.objects.property<URI>()
-
-    @Internal
-    val username = project.objects.property<String>().apply {
-        set(project.provider { project.findProperty("${name}Username") as? String })
-    }
-
-    @Internal
-    val password = project.objects.property<String>().apply {
-        set(project.provider { project.findProperty("${name}Password") as? String })
-    }
-
-    @Internal
-    val allowInsecureProtocol = project.objects.property<Boolean>()
-
-    @Optional
-    @Input
-    val stagingProfileId = project.objects.property<String>()
+    @get:Input
+    abstract val snapshotRepositoryUrl: Property<URI>
 
     @get:Internal
-    internal val capitalizedName by lazy { name.capitalize() }
+    abstract val username: Property<String>
+
+    @get:Internal
+    abstract val password: Property<String>
+
+    @get:Internal
+    abstract val allowInsecureProtocol: Property<Boolean>
+
+    @get:Optional
+    @get:Input
+    abstract val stagingProfileId: Property<String>
+
+    @get:Internal
+    internal val capitalizedName: String by lazy { name.capitalize() }
+
+    init {
+        username.set(project.providers.gradleProperty("${name}Username"))
+        password.set(project.providers.gradleProperty("${name}Password"))
+    }
 }

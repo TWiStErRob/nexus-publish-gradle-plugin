@@ -31,10 +31,12 @@ import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withType
 import org.gradle.util.GradleVersion
+import java.time.Duration
 
 @Suppress("UnstableApiUsage")
 class NexusPublishPlugin : Plugin<Project> {
@@ -50,7 +52,18 @@ class NexusPublishPlugin : Plugin<Project> {
         }
 
         val registry = createRegistry(project)
-        val extension = project.extensions.create<NexusPublishExtension>(NexusPublishExtension.NAME, project)
+        val extension = project.extensions.create<NexusPublishExtension>(NexusPublishExtension.NAME).apply {
+            useStaging.set(project.providers.provider { !project.version.toString().endsWith("-SNAPSHOT") })
+            packageGroup.set(project.providers.provider { project.group.toString() })
+            repositoryDescription.set(project.providers.provider { project.run { "$group:$name:$version" } })
+            // staging repository initialization can take a few minutes on Sonatype Nexus
+            clientTimeout.value(Duration.ofMinutes(5))
+            connectTimeout.value(Duration.ofMinutes(5))
+            transitionCheckOptions.value(project.objects.newInstance<TransitionCheckOptions>().apply {
+                maxRetries.value(60)
+                delayBetween.value(Duration.ofSeconds(10))
+            })
+        }
         configureNexusTasks(project, extension, registry)
         configurePublishingForAllProjects(project, extension, registry)
     }

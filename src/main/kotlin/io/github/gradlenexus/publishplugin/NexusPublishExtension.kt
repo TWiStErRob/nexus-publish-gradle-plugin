@@ -19,38 +19,28 @@ package io.github.gradlenexus.publishplugin
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectFactory
 import org.gradle.api.Project
+import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.container
 import org.gradle.kotlin.dsl.newInstance
-import org.gradle.kotlin.dsl.property
 import java.time.Duration
 
 @Suppress("UnstableApiUsage")
-open class NexusPublishExtension(project: Project) {
+abstract class NexusPublishExtension(project: Project) {
 
     companion object {
         internal const val NAME = "nexusPublishing"
     }
 
-    val useStaging = project.objects.property<Boolean>().apply {
-        set(project.provider { !project.version.toString().endsWith("-SNAPSHOT") })
+    abstract val useStaging: Property<Boolean>
+    abstract val packageGroup: Property<String>
+    abstract val repositoryDescription: Property<String>
+    abstract val clientTimeout: Property<Duration>
+    abstract val connectTimeout: Property<Duration>
+    abstract val transitionCheckOptions: Property<TransitionCheckOptions>
+
+    fun transitionCheckOptions(action: Action<in TransitionCheckOptions>) {
+        action.execute(transitionCheckOptions.get())
     }
-
-    val packageGroup = project.objects.property<String>().apply {
-        set(project.provider { project.group.toString() })
-    }
-
-    val repositoryDescription = project.objects.property<String>().apply {
-        set(project.provider { project.run { "$group:$name:$version" } })
-    }
-
-    // staging repository initialization can take a few minutes on Sonatype Nexus
-    val clientTimeout = project.objects.property<Duration>().value(Duration.ofMinutes(5))
-
-    val connectTimeout = project.objects.property<Duration>().value(Duration.ofMinutes(5))
-
-    val transitionCheckOptions = project.objects.property<TransitionCheckOptions>().value(project.objects.newInstance(TransitionCheckOptions::class))
-
-    fun transitionCheckOptions(action: Action<in TransitionCheckOptions>) = action.execute(transitionCheckOptions.get())
 
     val repositories: NexusRepositoryContainer = project.objects.newInstance(
         DefaultNexusRepositoryContainer::class,
