@@ -26,7 +26,7 @@ import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
 abstract class AbstractNexusStagingRepositoryTask @Inject
-constructor(private val extension: NexusPublishExtension, repository: NexusRepository) : DefaultTask() {
+constructor(extension: NexusPublishExtension, repository: NexusRepository) : DefaultTask() {
 
     @get:Internal
     abstract val clientTimeout: Property<Duration>
@@ -41,11 +41,15 @@ constructor(private val extension: NexusPublishExtension, repository: NexusRepos
     @get:Input
     abstract val repositoryDescription: Property<String>
 
+    @get:Internal
+    internal abstract val useStaging: Property<Boolean>
+
     init {
         this.clientTimeout.set(extension.clientTimeout)
         this.connectTimeout.set(extension.connectTimeout)
         this.repository.set(repository)
         this.repositoryDescription.set(extension.repositoryDescription)
-        this.onlyIf { extension.useStaging.getOrElse(false) }
+        this.useStaging.set(extension.useStaging)
+        this.onlyIf { useStaging.getOrElse(false) }
     }
 }
