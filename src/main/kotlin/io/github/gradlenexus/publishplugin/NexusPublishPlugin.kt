@@ -89,6 +89,7 @@ class NexusPublishPlugin : Plugin<Project> {
                 }
             val initializeTask = rootProject.tasks
                 .register<InitializeNexusStagingRepository>("initialize${capitalizedName}StagingRepository") {
+                    this.packageGroup.set(extension.packageGroup)
                 }
             val findStagingRepositoryTask = rootProject.tasks
                 .register<FindStagingRepository>("find${capitalizedName}StagingRepository") {

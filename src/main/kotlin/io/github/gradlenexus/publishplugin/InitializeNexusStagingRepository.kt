@@ -29,7 +29,6 @@ import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
 abstract class InitializeNexusStagingRepository @Inject constructor(
-    extension: NexusPublishExtension,
     repository: NexusRepository,
     private val registry: Provider<StagingRepositoryDescriptorRegistry>
 ) : AbstractNexusStagingRepositoryTask(extension, repository) {
@@ -37,10 +36,6 @@ abstract class InitializeNexusStagingRepository @Inject constructor(
     @get:Optional
     @get:Input
     abstract val packageGroup: Property<String>
-
-    init {
-        this.packageGroup.set(extension.packageGroup)
-    }
 
     @TaskAction
     fun createStagingRepo() {
