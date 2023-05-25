@@ -36,6 +36,7 @@ import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withType
 import org.gradle.util.GradleVersion
+import java.net.URI
 import java.time.Duration
 
 @Suppress("UnstableApiUsage")
@@ -191,11 +192,7 @@ class NexusPublishPlugin : Plugin<Project> {
         return extension.repositories.associateWith { nexusRepo ->
             project.the<PublishingExtension>().repositories.maven {
                 name = nexusRepo.name
-                setUrl(
-                    project.provider {
-                        getRepoUrl(nexusRepo, extension, registry)
-                    }
-                )
+                setUrl(getRepoUrl(nexusRepo, extension, registry))
                 val allowInsecureProtocol = nexusRepo.allowInsecureProtocol.orNull
                 if (allowInsecureProtocol != null) {
                     if (GradleVersion.current() >= GradleVersion.version("6.0")) {
@@ -244,11 +241,13 @@ class NexusPublishPlugin : Plugin<Project> {
         }
     }
 
-    private fun getRepoUrl(nexusRepo: NexusRepository, extension: NexusPublishExtension, registry: Provider<StagingRepositoryDescriptorRegistry>) =
-        if (extension.useStaging.get()) {
-            registry.get()[nexusRepo.name].stagingRepositoryUrl
-        } else {
-            nexusRepo.snapshotRepositoryUrl.get()
+    private fun getRepoUrl(nexusRepo: NexusRepository, extension: NexusPublishExtension, registry: Provider<StagingRepositoryDescriptorRegistry>): Provider<URI> =
+        extension.useStaging.flatMap { useStaging ->
+            if (useStaging) {
+                registry.map { it[nexusRepo.name].stagingRepositoryUrl }
+            } else {
+                nexusRepo.snapshotRepositoryUrl
+            }
         }
 
     private fun configureSimplifiedCloseAndReleaseTask(rootProject: Project, extension: NexusPublishExtension) {
