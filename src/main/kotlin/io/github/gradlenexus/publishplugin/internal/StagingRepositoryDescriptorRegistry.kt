@@ -16,7 +16,6 @@
 
 package io.github.gradlenexus.publishplugin.internal
 
-import java.net.URI
 import java.util.concurrent.ConcurrentHashMap
 
 class StagingRepositoryDescriptorRegistry {
@@ -27,10 +26,7 @@ class StagingRepositoryDescriptorRegistry {
         mapping[name] = descriptor
     }
 
-    operator fun get(name: String) = mapping[name] ?: StagingRepositoryDescriptor(
-        URI.create("https://dummy/"),
-        "dummy"
-    )
+    operator fun get(name: String) = mapping[name] ?: throw IllegalStateException("No staging repository with name $name created")
 
     override fun toString() = mapping.toString()
 }
