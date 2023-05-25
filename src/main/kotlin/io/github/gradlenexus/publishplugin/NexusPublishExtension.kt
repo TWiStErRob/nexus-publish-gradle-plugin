@@ -42,18 +42,23 @@ abstract class NexusPublishExtension(project: Project) {
         action.execute(transitionCheckOptions.get())
     }
 
-    val repositories: NexusRepositoryContainer = project.objects.newInstance(
-        DefaultNexusRepositoryContainer::class,
-        // `project.container(NexusRepository::class) { name -> ... }`,
-        // but in Kotlin 1.3 "New Inference" is not implemented yet, so we have to be explicit.
-        // https://kotlinlang.org/docs/whatsnew14.html#new-more-powerful-type-inference-algorithm
-        project.container(
-            NexusRepository::class,
-            NamedDomainObjectFactory { name ->
-                project.objects.newInstance(NexusRepository::class, name, project)
-            }
+    val repositories: NexusRepositoryContainer = run {
+        // Note: these 2 could be injected in NexusPublishExtension constructor.
+        val objects = project.objects
+        val providers = project.providers
+        project.objects.newInstance(
+            DefaultNexusRepositoryContainer::class,
+            // `project.container(NexusRepository::class) { name -> ... }`,
+            // but in Kotlin 1.3 "New Inference" is not implemented yet, so we have to be explicit.
+            // https://kotlinlang.org/docs/whatsnew14.html#new-more-powerful-type-inference-algorithm
+            project.container(
+                NexusRepository::class,
+                NamedDomainObjectFactory { name ->
+                    objects.newInstance<NexusRepository>(name, objects, providers)
+                }
+            )
         )
-    )
+    }
 
     fun repositories(action: Action<in NexusRepositoryContainer>) = action.execute(repositories)
 }
